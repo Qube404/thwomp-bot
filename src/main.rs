@@ -57,7 +57,7 @@ impl EventHandler for Handler {
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::ApplicationCommand(command) = interaction {
-            println!("Recieved command interaction {:?}", command);
+            println!("Recieved command interaction: {:#?}", command);
 
             match command.data.name.as_str() {
                 "test" => commands::test::run(&command.data.options, &ctx, &command).await,

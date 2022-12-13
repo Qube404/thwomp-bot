@@ -2,6 +2,7 @@
 use std::{time::Duration, fmt::format};
 use std::collections::HashMap;
 
+use serenity::model::prelude::interaction::message_component::MessageComponentInteraction;
 use serenity::{
     builder::{CreateApplicationCommand, CreateButton, CreateComponents, CreateInteractionResponseData, CreateInteractionResponse},
     utils::MessageBuilder,
@@ -74,7 +75,7 @@ pub async fn run(options: &[CommandDataOption], ctx: &Context, cmd: &Application
         .await.unwrap();
 
     let interaction = 
-        match message.await_component_interaction(&ctx).timeout(Duration::from_secs(60 * 3)).await {
+        match message.await_component_interaction(&ctx).author_id(user.parse::<u64>().unwrap()).timeout(Duration::from_secs(60 * 3)).await {
             Some(x) => x,
             None => {
                 message.reply(&ctx, "Timed out").await.unwrap();
@@ -87,7 +88,7 @@ pub async fn run(options: &[CommandDataOption], ctx: &Context, cmd: &Application
     if let Err(why) = cmd.delete_original_interaction_response(&ctx.http).await {
         println!("Cannot delete interaction response: {}", why);
     }
-
+    
     //******Game Logic Section******//
     let mut winner: &String = object1;
     let mut loser: &String = object2;
