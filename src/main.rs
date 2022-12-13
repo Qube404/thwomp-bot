@@ -28,10 +28,11 @@ Nice to meet you, I am thwomp bot.
 ➡️ but the three things I should be able to do is play 7-item rock
 ➡️ paper scissors, read and calculate text equations and create
 ➡️ reaction votes for your messages.
-❓Have a problem?
-➡️ You can ping my developer Qube with @qube and he will get back
-➡️ to you when available.
-I hope you have fun!
+
+❓Something not working?
+➡️ Sounds like a you problem.
+
+I hope you have a great day, and don't forget to milk the milkman!
 — ThwompBot 🤖";
 
 const HELP_COMMAND: &str = "!help";
@@ -43,6 +44,12 @@ impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content == HELP_COMMAND {
             if let Err(why) = msg.channel_id.say(&ctx.http, HELP_MESSAGE).await {
+                println!("Error sending message: {:?}", why);
+            }
+        }
+
+        if msg.content == "kys" || msg.content == "KYS" || msg.content == "fuck you" {
+            if let Err(why) = msg.channel_id.say(&ctx.http, "Kill yourself you lonely fucking loser.").await {
                 println!("Error sending message: {:?}", why);
             }
         }
