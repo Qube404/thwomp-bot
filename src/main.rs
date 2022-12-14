@@ -48,8 +48,8 @@ impl EventHandler for Handler {
             }
         }
 
-        if msg.content == "kys" || msg.content == "KYS" || msg.content == "fuck you" {
-            if let Err(why) = msg.channel_id.say(&ctx.http, "Kill yourself you lonely fucking loser.").await {
+        if msg.content == "kys" || msg.content == "KYS" {
+            if let Err(why) = msg.channel_id.say(&ctx.http, "No you kill yourself you lonely fucking loser.").await {
                 println!("Error sending message: {:?}", why);
             }
         }
@@ -63,6 +63,7 @@ impl EventHandler for Handler {
                 "test" => commands::test::run(&command.data.options, &ctx, &command).await,
                 "ping" => commands::ping::run(&command.data.options, &ctx, &command).await,
                 "rock_paper_scissors" => commands::rock_paper_scissors::run(&command.data.options, &ctx, &command).await,
+                "qalc" => commands::qalculator::run(&command.data.options, &ctx, &command).await,
 
                 _ => if let Err(why) = command
                     .create_interaction_response(&ctx.http, |response| {
@@ -96,7 +97,8 @@ impl EventHandler for Handler {
         let global_commands = Command::create_global_application_command(&ctx.http, |command| {
             commands::test::register(command);
             commands::ping::register(command);
-            commands::rock_paper_scissors::register(command)
+            commands::rock_paper_scissors::register(command);
+            commands::qalculator::register(command)
         }).await;
 
         println!("I created the following global slash command: {:#?}", global_commands);

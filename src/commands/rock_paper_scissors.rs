@@ -50,7 +50,7 @@ pub async fn run(options: &[CommandDataOption], ctx: &Context, cmd: &Application
     println!("Object: {}\nUser: {}", object1, user);
 
     //******Discord API Interaction Section******//
-    let _content = cmd.create_interaction_response(&ctx.http, |response| {
+    if let Err(why) = cmd.create_interaction_response(&ctx.http, |response| {
         response
             .kind(InteractionResponseType::ChannelMessageWithSource)
             .interaction_response_data(|message| message
@@ -61,33 +61,30 @@ pub async fn run(options: &[CommandDataOption], ctx: &Context, cmd: &Application
                                                    menu.custom_id("object_select");
                                                    menu.placeholder("No object selected");
                                                    menu.options(|f| {
-                                                       f.create_option(|o| o.label("Rock").value("Rock"));
-                                                       f.create_option(|o| o.label("Paper").value("Paper"));
-                                                       f.create_option(|o| o.label("Scissors").value("Scissors"))
+                                                        f.create_option(|o| o.label("Rock").value("Rock"));
+                                                        f.create_option(|o| o.label("Paper").value("Paper"));
+                                                        f.create_option(|o| o.label("Scissors").value("Scissors"));
+                                                        f.create_option(|o| o.label("Cowboy").value("Cowboy"));
+                                                        f.create_option(|o| o.label("Virus").value("Virus"));
+                                                        f.create_option(|o| o.label("Computer").value("Computer"));
+                                                        f.create_option(|o| o.label("Thwomp").value("Thwomp"))
                                                    })
                                                })
                                            })
                                        }))
-    }).await.unwrap();
+    }).await {
+        println!("Cannot create interaction response: {}", why);
+    }
 
     let message = cmd
         .get_interaction_response(&ctx.http)
         .await.unwrap();
 
-    let interaction = 
-        match message.await_component_interaction(&ctx).author_id(user.parse::<u64>().unwrap()).timeout(Duration::from_secs(60 * 3)).await {
-            Some(x) => x,
-            None => {
-                message.reply(&ctx, "Timed out").await.unwrap();
-                return;
-            },
-        };
+    let mut interaction_stream =
+        message.await_component_interactions(&ctx).author_id(user.parse::<u64>().unwrap()).timeout(Duration::from_secs(60 * 3)).build();
 
-    let object2 = &interaction.data.values[0];
-
-    if let Err(why) = cmd.delete_original_interaction_response(&ctx.http).await {
-        println!("Cannot delete interaction response: {}", why);
-    }
+    let object2 = &interaction_stream.next().await.unwrap().data.values[0];
+    message.delete(&ctx).await.unwrap();
     
     //******Game Logic Section******//
     let mut winner: &String = object1;
@@ -104,7 +101,7 @@ pub async fn run(options: &[CommandDataOption], ctx: &Context, cmd: &Application
     rps_choices.insert("Paper", [["Virus", "ignores"], ["Cowboy", "gives papercut too"], ["Rock", "wraps and traps"]]);
 
     for (k, v) in rps_choices.iter() {
-        println!("key: {} val: {:#?}", k.to_string(), v);
+        //println!("key: {} val: {:#?}", k.to_string(), v);
 
         if object1 == k {
             for item in v {
@@ -151,6 +148,10 @@ pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicatio
                 .add_string_choice("Rock", "Rock")
                 .add_string_choice("Paper", "Paper")
                 .add_string_choice("Scissors", "Scissors")
+                .add_string_choice("Cowboy", "Cowboy")
+                .add_string_choice("Virus", "Virus")
+                .add_string_choice("Computer", "Computer")
+                .add_string_choice("Thwomp", "Thwomp")
         })
 
         .create_option(|option| {
