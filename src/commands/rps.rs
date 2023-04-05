@@ -2,6 +2,7 @@
 use std::{time::Duration, fmt::format};
 use std::collections::HashMap;
 
+use serenity::builder::CreateApplicationCommandOption;
 use serenity::model::prelude::interaction::message_component::MessageComponentInteraction;
 use serenity::{
     builder::{CreateApplicationCommand, CreateButton, CreateComponents, CreateInteractionResponseData, CreateInteractionResponse},
@@ -101,8 +102,6 @@ pub async fn run(options: &[CommandDataOption], ctx: &Context, cmd: &Application
     rps_choices.insert("Paper", [["Virus", "ignores"], ["Cowboy", "gives papercut too"], ["Rock", "wraps and traps"]]);
 
     for (k, v) in rps_choices.iter() {
-        //println!("key: {} val: {:#?}", k.to_string(), v);
-
         if object1 == k {
             for item in v {
                 if object2 == item[0] {
@@ -138,11 +137,14 @@ pub async fn run(options: &[CommandDataOption], ctx: &Context, cmd: &Application
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-    command.name("rock_paper_scissors").description("Get a user id")
-        .create_option(|option| {
-            option
-                .name("rock_paper_scissors")
-                .description("Play rock paper scissors")
+    command.name("rock_paper_scissors").description("Play rock paper scissors.")
+
+        // Set Options > Create Option because it automatically deletes options you dont' want
+        // tacked on to the bot.
+        .set_options(vec![
+            CreateApplicationCommandOption::default()
+                .name("object")
+                .description("Object to fight with")
                 .kind(CommandOptionType::String)
                 .required(true)
                 .add_string_choice("Rock", "Rock")
@@ -152,13 +154,13 @@ pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicatio
                 .add_string_choice("Virus", "Virus")
                 .add_string_choice("Computer", "Computer")
                 .add_string_choice("Thwomp", "Thwomp")
-        })
+                .to_owned(),
 
-        .create_option(|option| {
-            option
+            CreateApplicationCommandOption::default()
                 .name("user")
                 .description("User to challenge")
                 .kind(CommandOptionType::User)
                 .required(true)
-        })
+                .to_owned(),
+        ])
 }

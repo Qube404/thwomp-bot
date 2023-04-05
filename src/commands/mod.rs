@@ -1,3 +1,3 @@
 pub mod ping;
-pub mod rock_paper_scissors;
-pub mod test;
+pub mod rps;
+pub mod calc;

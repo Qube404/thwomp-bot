@@ -20,36 +20,13 @@ use serenity::{
     client::{Context, EventHandler},
 };
 
-const HELP_MESSAGE: &str = "
-Hello there, Human!
-Nice to meet you, I am thwomp bot.
-❓What can I do?
-➡️ Currently my functionality is limited due to my lazy developer
-➡️ but the three things I should be able to do is play 7-item rock
-➡️ paper scissors, read and calculate text equations and create
-➡️ reaction votes for your messages.
-
-❓Something not working?
-➡️ Sounds like a you problem.
-
-I hope you have a great day, and don't forget to milk the milkman!
-— ThwompBot 🤖";
-
-const HELP_COMMAND: &str = "!help";
-
 struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
-        if msg.content == HELP_COMMAND {
-            if let Err(why) = msg.channel_id.say(&ctx.http, HELP_MESSAGE).await {
-                println!("Error sending message: {:?}", why);
-            }
-        }
-
-        if msg.content == "kys" || msg.content == "KYS" {
-            if let Err(why) = msg.channel_id.say(&ctx.http, "No you kill yourself you lonely fucking loser.").await {
+        if msg.content.to_lowercase() == "kys" {
+            if let Err(why) = msg.channel_id.say(&ctx.http, "Fuck you.").await {
                 println!("Error sending message: {:?}", why);
             }
         }
@@ -60,10 +37,9 @@ impl EventHandler for Handler {
             println!("Recieved command interaction: {:#?}", command);
 
             match command.data.name.as_str() {
-                "test" => commands::test::run(&command.data.options, &ctx, &command).await,
                 "ping" => commands::ping::run(&command.data.options, &ctx, &command).await,
-                "rock_paper_scissors" => commands::rock_paper_scissors::run(&command.data.options, &ctx, &command).await,
-                "qalc" => commands::qalculator::run(&command.data.options, &ctx, &command).await,
+                "rps" => commands::rps::run(&command.data.options, &ctx, &command).await,
+                "calc" => commands::calc::run(&command.data.options, &ctx, &command).await,
 
                 _ => if let Err(why) = command
                     .create_interaction_response(&ctx.http, |response| {
@@ -95,10 +71,9 @@ impl EventHandler for Handler {
         println!("I now have the following guild slash commands: {:#?}", commands);
 
         let global_commands = Command::create_global_application_command(&ctx.http, |command| {
-            commands::test::register(command);
             commands::ping::register(command);
-            commands::rock_paper_scissors::register(command);
-            commands::qalculator::register(command)
+            commands::rps::register(command);
+            commands::calc::register(command)
         }).await;
 
         println!("I created the following global slash command: {:#?}", global_commands);
