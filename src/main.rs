@@ -1,6 +1,6 @@
 mod commands;
 
-use std::env;
+use std::{env, f64::consts::PI};
 use dotenv;
 
 use serenity::{
@@ -27,6 +27,12 @@ impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content.to_lowercase() == "kys" {
             if let Err(why) = msg.channel_id.say(&ctx.http, "Fuck you.").await {
+                println!("Error sending message: {:?}", why);
+            }
+        }
+
+        if msg.content == "π" {
+            if let Err(why) = msg.channel_id.say(&ctx.http, PI).await {
                 println!("Error sending message: {:?}", why);
             }
         }

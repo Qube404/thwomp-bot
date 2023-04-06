@@ -1,5 +1,5 @@
 use serenity::{
-    builder::{CreateApplicationCommand, CreateApplicationCommandOption},
+    builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateInteractionResponseData},
     client::Context,
 
     model::application::interaction::{
@@ -27,24 +27,29 @@ pub async fn run(options: &[CommandDataOption], ctx: &Context, cmd: &Application
     let calculation = match Equation::from(calculation) {
         Ok(val) => val,
         Err(why) => {       
-            cmd.channel_id.say(&ctx, format!("{why}")).await.expect("Failed to await future.");
+            interaction_response(cmd, ctx, true, &format!("{why}")).await;
             return
         }
     };
 
-    //******Discord API Interaction Section******//
-    if let Err(why) = cmd.create_interaction_response(&ctx.http, |response| {
+    interaction_response(cmd, ctx, false, &format!("{} = {}", calculation.get_equation(), calculation.get_result())).await;
+}
+
+//******Discord API Interaction Section******//
+async fn interaction_response(cmd: &ApplicationCommandInteraction, ctx: &Context, ephemeral: bool, content: &str) {
+    if let Err(why) = cmd.create_interaction_response(ctx, |response| {
         response
             .kind(InteractionResponseType::ChannelMessageWithSource)
             .interaction_response_data(|message| {
                 message
-                    .content(format!("Equation: {}\nResult: {}", calculation.get_equation(), calculation.get_result()))
+                    .content(content)
+                    .ephemeral(ephemeral)
             })
         }).await
     {
         println!("Cannot respond to slash command: {}", why);
     }
-}
+} 
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
     command.name("calc").description("An automatic text calculator.")
